@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ICARUS | ARCh 2027 · Critical Design Review</title>
+<meta name="description" content="Team ICARUS, BITS Pilani Dubai Campus. Critical Design Review for the Australian Rover Challenge 2027.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Cpath d='M32 8 L52 52 L32 42 L12 52 Z' fill='%23ff5a1f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--panel:#0b0b0b;--line:#1f1f1f;--text:#f2f2f2;--mute:#8a8a8a;--acc:#ff5a1f;--acc2:#ffd23f;--ok:#2bd67b}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.5;overflow-x:hidden}
+.mono{font-family:'JetBrains Mono',monospace}
+a{color:inherit;text-decoration:none}
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+main,nav,footer{position:relative;z-index:2}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+/* progress + cursor */
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--acc);z-index:100}
+#dot{position:fixed;width:14px;height:14px;border:1.5px solid var(--acc);border-radius:50%;pointer-events:none;z-index:99;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:normal}
+#dot.big{width:46px;height:46px;background:rgba(255,90,31,.15)}
+@media(hover:none){#dot{display:none}}
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;background:#000;border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.18em}
+.brand svg{width:30px;height:30px}
+.links{display:flex;gap:26px;font-size:14px;color:var(--mute)}
+.links a{transition:color .2s}.links a:hover,.links a.on{color:var(--acc)}
+.pill{border:1px solid var(--acc);color:var(--acc);padding:8px 16px;border-radius:99px;font-size:13px;transition:.2s}
+.pill:hover{background:var(--acc);color:#000}
+@media(max-width:860px){.links{display:none}}
+/* hero */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:90px;position:relative}
+.tag{display:inline-flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--panel);padding:7px 14px;border-radius:99px;font-size:12px;color:var(--mute);margin-bottom:28px}
+.tag i{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.25}}
+h1{font-size:clamp(54px,11vw,170px);line-height:.88;letter-spacing:-.045em;font-weight:700}
+h1 span{color:var(--acc)}
+.sub{font-size:clamp(17px,2vw,22px);color:var(--mute);max-width:640px;margin:30px 0 38px}
+.sub b{color:var(--text);font-weight:500}
+.cta{display:flex;gap:14px;flex-wrap:wrap}
+.btn{padding:15px 28px;border-radius:99px;font-weight:500;font-size:15px;border:1px solid var(--text);transition:.25s}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#000}
+.btn.p:hover{background:var(--text);border-color:var(--text)}
+.btn:not(.p):hover{background:var(--text);color:#000}
+.rover{position:absolute;right:-20px;bottom:6%;width:min(560px,48vw);opacity:.95;animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-14px)}}
+@media(max-width:980px){.rover{position:relative;width:100%;right:0;margin-top:40px}.hero{flex-direction:column;justify-content:center;align-items:flex-start}}
+.wheel{transform-box:fill-box;transform-origin:center;animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* countdown */
+.count{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#000}
+.count .wrap{display:grid;grid-template-columns:repeat(5,1fr)}
+.cell{padding:34px 10px;border-right:1px solid var(--line);text-align:center}
+.cell:last-child{border:0}
+.cell .n{font-size:clamp(30px,5vw,60px);font-weight:700;color:var(--acc);font-variant-numeric:tabular-nums}
+.cell .l{font-size:11px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase}
+.cell.lbl{display:flex;flex-direction:column;justify-content:center;text-align:left;padding-left:24px}
+.cell.lbl .n{font-size:15px;color:var(--text);font-weight:500}
+@media(max-width:700px){.count .wrap{grid-template-columns:repeat(2,1fr)}.cell{border-bottom:1px solid var(--line)}}
+/* sections */
+section{padding:130px 0}
+.eyebrow{font-size:12px;letter-spacing:.3em;color:var(--acc);text-transform:uppercase;margin-bottom:16px}
+h2{font-size:clamp(34px,5.5vw,76px);letter-spacing:-.035em;line-height:1;margin-bottom:24px;max-width:900px}
+.lead{color:var(--mute);font-size:19px;max-width:680px}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s}
+.rv.in{opacity:1;transform:none}
+/* mission cards */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:32px;transition:.3s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--acc);transform:translateY(-6px)}
+.card .ic{width:54px;height:54px;margin-bottom:22px}
+.card h3{font-size:24px;margin-bottom:10px}
+.card p{color:var(--mute);font-size:15px}
+.card .no{position:absolute;top:22px;right:26px;font-size:13px;color:var(--line)}
+/* subsystems tabs */
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin:50px 0 24px}
+.tab{background:none;border:1px solid var(--line);color:var(--mute);padding:12px 22px;border-radius:99px;font:inherit;font-size:14px;cursor:pointer;transition:.2s}
+.tab:hover{color:var(--text);border-color:var(--text)}
+.tab.on{background:var(--acc);border-color:var(--acc);color:#000;font-weight:700}
+.pane{display:none;grid-template-columns:1.1fr 1fr;gap:18px}
+.pane.on{display:grid;animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}}
+@media(max-width:900px){.pane.on{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:34px}
+.box h3{font-size:30px;margin-bottom:14px}
+.box ul{list-style:none;margin-top:18px}
+.box li{padding:13px 0;border-top:1px solid var(--line);display:flex;gap:12px;color:var(--mute);font-size:15px}
+.box li::before{content:"▸";color:var(--acc)}
+.vis{display:flex;align-items:center;justify-content:center;min-height:300px}
+.vis svg{width:78%;max-width:340px}
+/* tasks */
+.tasks{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+@media(max-width:900px){.tasks{grid-template-columns:1fr}}
+.task{border:1px solid var(--line);border-radius:18px;padding:30px;background:var(--panel)}
+.task .st{display:inline-block;font-size:11px;letter-spacing:.15em;padding:5px 12px;border-radius:99px;margin-bottom:18px}
+.st.a{background:var(--acc);color:#000}.st.d{border:1px solid var(--mute);color:var(--mute)}
+.task h3{font-size:22px;margin-bottom:8px}.task p{color:var(--mute);font-size:15px}
+/* teams */
+.groups{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px}
+@media(max-width:1000px){.groups{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.groups{grid-template-columns:1fr}}
+.g{border:1px solid var(--line);border-radius:18px;padding:28px;background:var(--panel);transition:.3s}
+.g:hover{background:var(--acc);color:#000}.g:hover p,.g:hover .mono{color:#000}
+.g .mono{color:var(--acc);font-size:12px;letter-spacing:.2em}
+.g h3{font-size:26px;margin:12px 0 8px}.g p{color:var(--mute);font-size:14px}
+.people{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:18px}
+.p{border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;gap:16px;align-items:center;background:var(--panel)}
+.av{width:52px;height:52px;border-radius:50%;background:var(--acc);color:#000;display:grid;place-items:center;font-weight:700;flex:none}
+.p small{color:var(--mute);display:block;font-size:13px}
+/* budget */
+.bud{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:56px;align-items:center}
+@media(max-width:900px){.bud{grid-template-columns:1fr}}
+.big{font-size:clamp(46px,7vw,100px);font-weight:700;letter-spacing:-.04em;line-height:1}
+.big small{display:block;font-size:14px;letter-spacing:.2em;color:var(--mute);font-weight:400;margin-bottom:14px}
+.row{margin:22px 0}
+.row .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:9px}
+.row .t span:last-child{color:var(--mute)}
+.track{height:10px;background:var(--line);border-radius:9px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--acc);border-radius:9px;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.in .fill{width:var(--w)}
+/* timeline */
+.tl{margin-top:56px;border-left:2px solid var(--line);padding-left:34px}
+.ev{position:relative;padding-bottom:42px}
+.ev::before{content:"";position:absolute;left:-43px;top:6px;width:16px;height:16px;border-radius:50%;background:#000;border:2px solid var(--mute)}
+.ev.done::before{background:var(--ok);border-color:var(--ok)}
+.ev.now::before{background:var(--acc);border-color:var(--acc);animation:pulse 1.4s infinite}
+.ev .d{color:var(--acc);font-size:13px;letter-spacing:.15em}
+.ev h3{font-size:24px;margin:4px 0}.ev p{color:var(--mute);font-size:15px}
+/* logistics */
+.log{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px}
+@media(max-width:1000px){.log{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.log{grid-template-columns:1fr}}
+/* risk */
+table{width:100%;border-collapse:collapse;margin-top:50px;font-size:15px}
+th{text-align:left;font-size:11px;letter-spacing:.2em;color:var(--mute);padding:14px;border-bottom:1px solid var(--text)}
+td{padding:20px 14px;border-bottom:1px solid var(--line);color:var(--mute);vertical-align:top}
+td:first-child{color:var(--text);font-weight:500}
+.lv{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700;color:#000}
+.hi{background:var(--acc)}.md{background:var(--acc2)}.lo{background:var(--ok)}
+@media(max-width:700px){th:nth-child(3),td:nth-child(3){display:none}}
+/* cta */
+.final{text-align:center;border-top:1px solid var(--line)}
+.final h2{margin:0 auto 30px}
+footer{border-top:1px solid var(--line);padding:50px 0;color:var(--mute);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;align-items:center}
+</style>
+</head>
+<body>
+<div id="bar"></div><div id="dot"></div>
+<canvas id="stars"></canvas>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="brand">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="none" stroke="#ff5a1f" stroke-width="3"/><path d="M32 10 L48 50 L32 41 L16 50 Z" fill="#ff5a1f"/><circle cx="32" cy="28" r="4" fill="#000"/></svg>
+      ICARUS
+    </a>
+    <div class="links mono">
+      <a href="#mission">Mission</a><a href="#systems">Systems</a><a href="#tasks">Tasks</a><a href="#team">Team</a><a href="#timeline">Timeline</a><a href="#logistics">Logistics</a>
+    </div>
+    <a href="#contact" class="pill mono">CDR 2026</a>
+  </div>
+</nav>
+
+<main id="top">
+<header class="hero">
+  <div class="wrap">
+    <div class="tag mono"><i></i> CRITICAL DESIGN REVIEW · 23 OCT 2026</div>
+    <h1>ICARUS<span>.</span><br>ROVER</h1>
+    <p class="sub">BITS Pilani Dubai Campus is sending its first lunar rover to the <b>Australian Rover Challenge 2027</b>, Adelaide University, Roseworthy. Mechanical, electrical and computer science, one machine.</p>
+    <div class="cta"><a class="btn p" href="#systems">Explore the design</a><a class="btn" href="#timeline">See the road to Roseworthy</a></div>
+  </div>
+  <svg class="rover" viewBox="0 0 560 300" fill="none">
+    <rect x="130" y="90" width="300" height="70" rx="10" fill="#0b0b0b" stroke="#ff5a1f" stroke-width="2.5"/>
+    <rect x="160" y="62" width="110" height="34" rx="6" fill="#000" stroke="#f2f2f2" stroke-width="2"/>
+    <rect x="290" y="105" width="110" height="40" rx="4" fill="#ff5a1f"/>
+    <path d="M200 160 L150 215 M360 160 L410 215 M280 160 L280 205" stroke="#f2f2f2" stroke-width="5" stroke-linecap="round"/>
+    <path d="M345 90 L345 40 L400 18" stroke="#ff5a1f" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="403" cy="17" r="8" fill="#ffd23f"/>
+    <path d="M205 62 L205 30 M205 30 L232 20" stroke="#f2f2f2" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="238" cy="18" r="7" fill="none" stroke="#f2f2f2" stroke-width="2.5"/>
+    <g><circle class="wheel" cx="150" cy="235" r="44" fill="#000" stroke="#f2f2f2" stroke-width="3"/><path class="wheel" d="M150 191V279M106 235H194M119 204L181 266M181 204L119 266" stroke="#ff5a1f" stroke-width="3"/></g>
+    <g><circle class="wheel" cx="280" cy="235" r="44" fill="#000" stroke="#f2f2f2" stroke-width="3"/><path class="wheel" d="M280 191V279M236 235H324M249 204L311 266M311 204L249 266" stroke="#ff5a1f" stroke-width="3"/></g>
+    <g><circle class="wheel" cx="410" cy="235" r="44" fill="#000" stroke="#f2f2f2" stroke-width="3"/><path class="wheel" d="M410 191V279M366 235H454M379 204L441 266M441 204L379 266" stroke="#ff5a1f" stroke-width="3"/></g>
+    <path d="M20 282 H540" stroke="#1f1f1f" stroke-width="3" stroke-dasharray="8 10"/>
+  </svg>
+</header>
+
+<div class="count">
+  <div class="wrap">
+    <div class="cell lbl"><span class="l">T-minus to</span><span class="n">ARCh 2027 · 18 Mar</span></div>
+    <div class="cell"><div class="n" id="d">--</div><div class="l">Days</div></div>
+    <div class="cell"><div class="n" id="h">--</div><div class="l">Hours</div></div>
+    <div class="cell"><div class="n" id="m">--</div><div class="l">Minutes</div></div>
+    <div class="cell"><div class="n" id="s">--</div><div class="l">Seconds</div></div>
+  </div>
+</div>
+
+<section id="mission"><div class="wrap">
+  <div class="eyebrow mono rv">01 / Mission</div>
+  <h2 class="rv">A lunar-analogue rover, built year one to compete.</h2>
+  <p class="lead rv">The Australian Rover Challenge is an international robotics competition where university teams build rovers for lunar-style tasks. ICARUS is our first entry: an interdisciplinary team targeting three tasks this year and a platform built to grow.</p>
+  <div class="grid3">
+    <div class="card rv"><span class="no mono">A</span>
+      <svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><circle cx="27" cy="27" r="22"/><path d="M27 5V49M5 27H49"/></svg>
+      <h3>Compete</h3><p>Field a competitive rover and a travelling squad of about ten at Roseworthy, South Australia, 18 to 21 March 2027.</p></div>
+    <div class="card rv"><span class="no mono">B</span>
+      <svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><rect x="6" y="6" width="18" height="18"/><rect x="30" y="6" width="18" height="18"/><rect x="6" y="30" width="18" height="18"/><rect x="30" y="30" width="18" height="18"/></svg>
+      <h3>Integrate</h3><p>Mechanical, EEE and CS students working as one team, with CNC and mechanical lab access confirmed on campus.</p></div>
+    <div class="card rv"><span class="no mono">C</span>
+      <svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><path d="M6 44L20 28L30 36L48 10"/><path d="M38 10H48V20"/></svg>
+      <h3>Build a legacy</h3><p>A repeatable rover programme for BPDC, built to grow in the years ahead.</p></div>
+  </div>
+</div></section>
+
+<section id="systems" style="background:#000"><div class="wrap">
+  <div class="eyebrow mono rv">02 / System design</div>
+  <h2 class="rv">Four groups. One rover.</h2>
+  <div class="tabs rv" role="tablist">
+    <button class="tab on" data-t="0">Mechanical</button>
+    <button class="tab" data-t="1">Electrical</button>
+    <button class="tab" data-t="2">IoT + Comms</button>
+    <button class="tab" data-t="3">Autonomy / Core</button>
+  </div>
+
+  <div class="pane on box-wrap">
+    <div class="box"><h3>Mechanical</h3><p class="lead" style="font-size:16px">Chassis, mobility and manipulation for excavation and construction work.</p>
+      <ul><li>Chassis and suspension for uneven terrain</li><li>Drive train and wheel assemblies</li><li>Excavation and construction mechanism</li><li>Prototyping on the university CNC and mechanical lab</li></ul></div>
+    <div class="box vis"><svg viewBox="0 0 200 200" fill="none" stroke="#ff5a1f" stroke-width="3"><circle cx="100" cy="100" r="70"/><circle cx="100" cy="100" r="20"/><path d="M100 30V80M100 120V170M30 100H80M120 100H170M50 50L86 86M114 114L150 150M150 50L114 86M86 114L50 150"/></svg></div>
+  </div>
+
+  <div class="pane">
+    <div class="box"><h3>Electrical</h3><p class="lead" style="font-size:16px">Power, motor control and safe battery integration.</p>
+      <ul><li>Power distribution and protection</li><li>Motor drivers and actuator control</li><li>Lithium battery packs built to UN38.3 documentation</li><li>Wiring harness and onboard sensing</li></ul></div>
+    <div class="box vis"><svg viewBox="0 0 200 200" fill="none" stroke="#ff5a1f" stroke-width="3"><path d="M110 10L50 110H100L90 190L150 85H100Z" fill="#ff5a1f"/></svg></div>
+  </div>
+
+  <div class="pane">
+    <div class="box"><h3>IoT + Comms</h3><p class="lead" style="font-size:16px">The link between rover and base station.</p>
+      <ul><li>Mandatory base station</li><li>Radio link for command and telemetry</li><li>Video and sensor data streaming</li><li>Operator console for mission control</li></ul></div>
+    <div class="box vis"><svg viewBox="0 0 200 200" fill="none" stroke="#ff5a1f" stroke-width="3"><circle cx="100" cy="150" r="10" fill="#ff5a1f"/><path d="M62 112A54 54 0 0 1 138 112M38 88A88 88 0 0 1 162 88M14 64A122 122 0 0 1 186 64"/></svg></div>
+  </div>
+
+  <div class="pane">
+    <div class="box"><h3>Autonomy / Core</h3><p class="lead" style="font-size:16px">System-level integration, mapping and autonomous navigation.</p>
+      <ul><li>Mapping and autonomous task software</li><li>Two CS and autonomy specialists on the squad</li><li>Systems integration and process ownership</li><li>Test and verification across all groups</li></ul></div>
+    <div class="box vis"><svg viewBox="0 0 200 200" fill="none" stroke="#ff5a1f" stroke-width="3"><rect x="50" y="50" width="100" height="100" rx="8"/><rect x="80" y="80" width="40" height="40" fill="#ff5a1f"/><path d="M70 50V25M100 50V25M130 50V25M70 175V150M100 175V150M130 175V150M50 70H25M50 100H25M50 130H25M175 70H150M175 100H150M175 130H150"/></svg></div>
+  </div>
+</div></section>
+
+<section id="tasks"><div class="wrap">
+  <div class="eyebrow mono rv">03 / Competition tasks</div>
+  <h2 class="rv">Three tasks this year.</h2>
+  <div class="tasks">
+    <div class="task rv"><span class="st a mono">YEAR 1</span><h3>Post-Landing</h3><p>Post-landing operations and set-up tasks after arrival on the simulated lunar surface.</p></div>
+    <div class="task rv"><span class="st a mono">YEAR 1</span><h3>Excavation &amp; Construction</h3><p>Moving and placing material with the rover's mechanical systems.</p></div>
+    <div class="task rv"><span class="st a mono">YEAR 1</span><h3>Mapping &amp; Autonomous</h3><p>Building a map of the terrain and navigating with minimal operator input.</p></div>
+  </div>
+</div></section>
+
+<section id="team" style="background:#000"><div class="wrap">
+  <div class="eyebrow mono rv">04 / Team</div>
+  <h2 class="rv">A travelling squad of ten.</h2>
+  <div class="groups">
+    <div class="g rv"><span class="mono">GROUP 01</span><h3>Mech</h3><p>Chassis, mobility, manipulation</p></div>
+    <div class="g rv"><span class="mono">GROUP 02</span><h3>Electrical</h3><p>Power, drives, battery systems</p></div>
+    <div class="g rv"><span class="mono">GROUP 03</span><h3>IoT + Comms</h3><p>Radio link and base station</p></div>
+    <div class="g rv"><span class="mono">GROUP 04</span><h3>Core</h3><p>Integration and autonomy</p></div>
+  </div>
+  <div class="people">
+    <div class="p rv"><div class="av">NC</div><div><b>Naman Chawla</b><small>Team Lead</small></div></div>
+    <div class="p rv"><div class="av">M</div><div><b>Mansha</b><small>Team Co-Lead</small></div></div>
+    <div class="p rv"><div class="av">SK</div><div><b>Dr. Shashank Khurana</b><small>Team Supervisor</small></div></div>
+    <div class="p rv"><div class="av">S</div><div><b>Shashank Sir</b><small>Faculty Coordinator, Mechanical</small></div></div>
+  </div>
+</div></section>
+
+<section id="timeline" style="background:#000"><div class="wrap">
+  <div class="eyebrow mono rv">05 / Road to Roseworthy</div>
+  <h2 class="rv">Milestones.</h2>
+  <div class="tl">
+    <div class="ev rv"><span class="d mono">11 SEP 2026</span><h3>Registration closes</h3><p>Team registration deadline for ARCh 2027.</p></div>
+    <div class="ev rv"><span class="d mono">23 OCT 2026</span><h3>Critical Design Review</h3><p>Design baseline presented and frozen for build.</p></div>
+    <div class="ev rv"><span class="d mono">NEXT</span><h3>Build and integration</h3><p>Fabrication on campus, subsystem testing, system-level integration.</p></div>
+    <div class="ev rv"><span class="d mono">PRE-SHIP</span><h3>Freight readiness</h3><p>UN38.3 battery documentation and Australian biosecurity preparation.</p></div>
+    <div class="ev rv"><span class="d mono">18 – 21 MAR 2027</span><h3>ARCh 2027, Roseworthy, SA</h3><p>Competition at Adelaide University's Roseworthy Campus.</p></div>
+  </div>
+</div></section>
+
+<section id="logistics"><div class="wrap">
+  <div class="eyebrow mono rv">06 / Logistics</div>
+  <h2 class="rv">Dubai to Adelaide.</h2>
+  <div class="log">
+    <div class="card rv"><svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><path d="M6 30L48 12L36 46L26 34Z"/></svg><h3 style="font-size:20px">Travel</h3><p>Emirates nonstop DXB to ADL is the direct route identified.</p></div>
+    <div class="card rv"><svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><rect x="8" y="16" width="36" height="22" rx="3"/><path d="M44 22H50V32H44M16 22V32M24 22V32"/></svg><h3 style="font-size:20px">Batteries</h3><p>UN38.3 lithium battery documentation is built into design from day one.</p></div>
+    <div class="card rv"><svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><path d="M27 6C12 14 12 36 27 48C42 36 42 14 27 6Z"/><path d="M27 16V44"/></svg><h3 style="font-size:20px">Biosecurity</h3><p>Imported machinery must meet Australian biosecurity rules. Planning is proactive.</p></div>
+    <div class="card rv"><svg class="ic" viewBox="0 0 54 54" fill="none" stroke="#ff5a1f" stroke-width="2.5"><circle cx="16" cy="40" r="6"/><circle cx="40" cy="40" r="6"/><path d="M6 40V20H34L48 30V40"/></svg><h3 style="font-size:20px">Sourcing</h3><p>Components sourced across Dubai and India by type.</p></div>
+  </div>
+</div></section>
+
+<section class="final" id="contact"><div class="wrap">
+  <div class="eyebrow mono rv">Mission go / no-go</div>
+  <h2 class="rv">See you at Roseworthy.</h2>
+  <div class="cta rv" style="justify-content:center"><a class="btn p" href="#top">Back to top</a></div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <div class="brand"><svg viewBox="0 0 64 64" style="width:26px"><circle cx="32" cy="32" r="29" fill="none" stroke="#ff5a1f" stroke-width="3"/><path d="M32 10 L48 50 L32 41 L16 50 Z" fill="#ff5a1f"/></svg>ICARUS</div>
+  <div class="mono">BITS Pilani Dubai Campus · Australian Rover Challenge 2027</div>
+  <div class="mono">CDR · 23.10.2026</div>
+</div></footer>
+
+<script>
+// scroll progress
+const bar=document.getElementById('bar');
+addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'});
+// reveal
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+// tabs
+const tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.pane');
+tabs.forEach(t=>t.onclick=()=>{tabs.forEach(x=>x.classList.remove('on'));panes.forEach(x=>x.classList.remove('on'));t.classList.add('on');panes[+t.dataset.t].classList.add('on')});
+// countdown to 18 Mar 2027 (Adelaide, ACDT UTC+10:30)
+const target=new Date('2027-03-18T09:00:00+10:30').getTime();
+function tick(){let d=Math.max(0,target-Date.now());const D=Math.floor(d/864e5);d%=864e5;const H=Math.floor(d/36e5);d%=36e5;const M=Math.floor(d/6e4);const S=Math.floor(d%6e4/1e3);
+ const p=n=>String(n).padStart(2,'0');document.getElementById('d').textContent=D;document.getElementById('h').textContent=p(H);document.getElementById('m').textContent=p(M);document.getElementById('s').textContent=p(S)}
+tick();setInterval(tick,1000);
+// active nav link
+const secs=[...document.querySelectorAll('section[id]')],links=[...document.querySelectorAll('.links a')];
+addEventListener('scroll',()=>{let c='';secs.forEach(s=>{if(scrollY>=s.offsetTop-200)c=s.id});links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+c))});
+// cursor
+const dot=document.getElementById('dot');
+addEventListener('mousemove',e=>{dot.style.left=e.clientX+'px';dot.style.top=e.clientY+'px'});
+document.querySelectorAll('a,button,.card,.g').forEach(el=>{el.addEventListener('mouseenter',()=>dot.classList.add('big'));el.addEventListener('mouseleave',()=>dot.classList.remove('big'))});
+// starfield with parallax (solid-colour dots)
+const cv=document.getElementById('stars'),cx=cv.getContext('2d');let W,H,st=[];
+function init(){W=cv.width=innerWidth;H=cv.height=innerHeight;st=Array.from({length:Math.floor(W*H/6500)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,z:Math.random()*.6+.1,o:Math.random()}))}
+function draw(){cx.clearRect(0,0,W,H);const sy=scrollY;
+ for(const s of st){s.o+=.01;const a=.35+Math.abs(Math.sin(s.o))*.65;let y=(s.y-sy*s.z)%H;if(y<0)y+=H;cx.globalAlpha=a;cx.fillStyle=s.r>1.2?'#ff5a1f':'#ffffff';cx.beginPath();cx.arc(s.x,y,s.r,0,6.283);cx.fill()}
+ requestAnimationFrame(draw)}
+init();draw();addEventListener('resize',init);
+</script>
+</body>
+</html>
